@@ -1,155 +1,197 @@
 package com.atlaslogistics.ui;
 
-import com.atlaslogistics.core.LogisticsManager;
-import com.atlaslogistics.model.Shipment;
+import com.atlaslogistics.core.LogisticsManager;   // Logistics manager singleton
+import com.atlaslogistics.model.Shipment;          // Shipment model
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import javax.swing.*;                              // Swing components
+import javax.swing.table.DefaultTableModel;        // Table model
+import java.awt.*;                                 // Layouts, dimensions, insets
 
-import static com.atlaslogistics.constants.ShippingConstants.*;
-import static com.atlaslogistics.ui.UIFactory.*;
+import static com.atlaslogistics.constants.ShippingConstants.*; // Shipping constants
+import static com.atlaslogistics.ui.UIFactory.*;                // Reusable UI utilities
 
 public class ShipmentsPanel extends JPanel {
 
-    private final LogisticsManager mgr;
-    private final AppListener      listener;
+    private final LogisticsManager mgr;   // Central logistics manager
+    private final AppListener listener;   // Listener for main app communication
 
-    private JTextField    txtPkgId, txtDest, txtWeight, txtItems;
-    private JComboBox<String> cboPriority, cboCarrier;
-    private DefaultTableModel tableModel;
-    private JTable        table;
+    private JTextField txtPkgId, txtDest, txtWeight, txtItems; // Input fields
+    private JComboBox<String> cboPriority, cboCarrier;         // Dropdowns
+    private DefaultTableModel tableModel;                      // Table model
+    private JTable table;                                      // Shipments table
 
     public ShipmentsPanel(AppListener listener) {
-        this.mgr      = LogisticsManager.getInstance();
-        this.listener = listener;
-        setBackground(C_BG);
-        setLayout(new BorderLayout(0, 12));
-        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        build();
+        this.mgr = LogisticsManager.getInstance(); // Gets singleton manager
+        this.listener = listener;                  // Stores listener
+        setBackground(C_BG);                       // Background color
+        setLayout(new BorderLayout(0, 12));        // Main layout
+        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16)); // Padding
+        build();                                   // Builds UI
     }
 
     private void build() {
-        JPanel form = whiteCard();
+        JPanel form = whiteCard(); // Shipment form panel
         form.setBorder(BorderFactory.createCompoundBorder(
-            titledBorder("Add New Shipment"),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)));
-        form.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 6, 5, 6);
-        gbc.fill   = GridBagConstraints.HORIZONTAL;
+            titledBorder("Add New Shipment"),               // Form title
+            BorderFactory.createEmptyBorder(10, 12, 10, 12))); // Inner padding
+        form.setLayout(new GridBagLayout()); // Flexible form layout
 
-        txtPkgId    = styledField("e.g. PKG-1050");
-        txtDest     = styledField("e.g. Bangalore");
-        txtWeight   = styledField("e.g. 3.5");
-        cboPriority = styledCombo(new String[]{"Standard", "Express", "Overnight"});
-        cboCarrier  = styledCombo(new String[]{"Auto", "Bike", "Van", "Plane"});
-        txtItems    = styledField("e.g. Box A, Envelope B, Parcel C  (ellipsis)");
+        GridBagConstraints gbc = new GridBagConstraints(); // Layout constraints
+        gbc.insets = new Insets(5, 6, 5, 6);              // Spacing
+        gbc.fill = GridBagConstraints.HORIZONTAL;         // Horizontal fill
 
-        addFormRow(form, gbc, 0, "Package ID",       txtPkgId);
-        addFormRow(form, gbc, 1, "Destination",      txtDest);
-        addFormRow(form, gbc, 2, "Weight (kg)",      txtWeight);
-        addFormRow(form, gbc, 3, "Priority",         cboPriority);
-        addFormRow(form, gbc, 4, "Carrier Type",     cboCarrier);
-        addFormRow(form, gbc, 5, "Items (ellipsis)", txtItems);
+        txtPkgId = styledField("e.g. PKG-1050");   // Package ID field
+        txtDest = styledField("e.g. Bangalore");   // Destination field
+        txtWeight = styledField("e.g. 3.5");       // Weight field
 
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        btnRow.setOpaque(false);
-        JButton btnAdd    = accentButton("Add Shipment",    C_ACCENT);
-        JButton btnDelete = accentButton("Delete Selected", C_DANGER);
-        JButton btnMark   = accentButton("Mark Delivered",  C_SUCCESS);
-        btnRow.add(btnAdd); btnRow.add(btnDelete); btnRow.add(btnMark);
+        cboPriority = styledCombo(new String[]{"Standard", "Express", "Overnight"}); // Priority dropdown
+        cboCarrier = styledCombo(new String[]{"Auto", "Bike", "Van", "Plane"});      // Carrier dropdown
 
-        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
-        gbc.insets = new Insets(10, 6, 2, 6);
-        form.add(btnRow, gbc);
+        txtItems = styledField("e.g. Box A, Envelope B, Parcel C  (ellipsis)"); // Items field
 
-        String[] cols = {"Package ID","Destination","Weight","Priority","Carrier","Status","Items"};
+        addFormRow(form, gbc, 0, "Package ID", txtPkgId);       // Row 1
+        addFormRow(form, gbc, 1, "Destination", txtDest);       // Row 2
+        addFormRow(form, gbc, 2, "Weight (kg)", txtWeight);     // Row 3
+        addFormRow(form, gbc, 3, "Priority", cboPriority);      // Row 4
+        addFormRow(form, gbc, 4, "Carrier Type", cboCarrier);   // Row 5
+        addFormRow(form, gbc, 5, "Items (ellipsis)", txtItems); // Row 6
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0)); // Button row
+        btnRow.setOpaque(false); // Transparent
+
+        JButton btnAdd = accentButton("Add Shipment", C_ACCENT);       // Add button
+        JButton btnDelete = accentButton("Delete Selected", C_DANGER); // Delete button
+        JButton btnMark = accentButton("Mark Delivered", C_SUCCESS);   // Delivered button
+
+        btnRow.add(btnAdd);    // Adds add button
+        btnRow.add(btnDelete); // Adds delete button
+        btnRow.add(btnMark);   // Adds delivered button
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;                       // Spans 2 columns
+        gbc.insets = new Insets(10, 6, 2, 6);   // Top spacing
+        form.add(btnRow, gbc);                   // Adds buttons
+
+        String[] cols = {"Package ID","Destination","Weight","Priority","Carrier","Status","Items"}; // Table columns
+
         tableModel = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) { return false; } // Makes table read-only
         };
-        table = styledTable(tableModel);
-        JScrollPane scroll = scrollPane(table);
-        scroll.setBorder(titledBorder("All Shipments"));
 
-        btnAdd.addActionListener(e    -> onAdd());
-        btnDelete.addActionListener(e -> onDelete());
-        btnMark.addActionListener(e   -> onMarkDelivered());
+        table = styledTable(tableModel);      // Styled table
+        JScrollPane scroll = scrollPane(table); // Scroll pane
+        scroll.setBorder(titledBorder("All Shipments")); // Table title
 
-        add(form,   BorderLayout.NORTH);
-        add(scroll, BorderLayout.CENTER);
+        btnAdd.addActionListener(e -> onAdd());             // Add action
+        btnDelete.addActionListener(e -> onDelete());       // Delete action
+        btnMark.addActionListener(e -> onMarkDelivered());  // Delivered action
+
+        add(form, BorderLayout.NORTH);   // Form at top
+        add(scroll, BorderLayout.CENTER); // Table at center
     }
 
     private void onAdd() {
         try {
-            String id     = txtPkgId.getText().trim();
-            String dest   = txtDest.getText().trim();
-            String wStr   = txtWeight.getText().trim();
+            String id = txtPkgId.getText().trim();    // Reads package ID
+            String dest = txtDest.getText().trim();   // Reads destination
+            String wStr = txtWeight.getText().trim(); // Reads weight
 
             if (id.isEmpty() || dest.isEmpty() || wStr.isEmpty())
-                throw new IllegalArgumentException("Package ID, Destination and Weight are required.");
+                throw new IllegalArgumentException("Package ID, Destination and Weight are required."); // Validation
 
             double weight;
-            try { weight = Double.parseDouble(wStr); }
-            catch (NumberFormatException ex) {
-                throw new IllegalArgumentException("Weight must be a valid number."); }
+            try {
+                weight = Double.parseDouble(wStr); // Converts weight to number
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Weight must be a valid number.");
+            }
 
             if (weight <= 0)
-                throw new IllegalArgumentException("Weight must be greater than 0.");
+                throw new IllegalArgumentException("Weight must be greater than 0."); // Positive check
 
-            String priority = (String) cboPriority.getSelectedItem();
-            String carrier  = (String) cboCarrier.getSelectedItem();
+            String priority = (String) cboPriority.getSelectedItem(); // Selected priority
+            String carrier = (String) cboCarrier.getSelectedItem();   // Selected carrier
 
             Shipment s = "Auto".equals(carrier)
                 ? new Shipment(id, dest, weight, priority,
-                    weight <= BIKE_MAX_KG ? "Bike" : weight <= VAN_MAX_KG ? "Van" : "Plane")
-                : new Shipment(id, dest, weight, priority, carrier);
+                    weight <= BIKE_MAX_KG ? "Bike" : weight <= VAN_MAX_KG ? "Van" : "Plane") // Auto carrier selection
+                : new Shipment(id, dest, weight, priority, carrier); // Manual carrier selection
 
-            String itemsStr = txtItems.getText().trim();
+            String itemsStr = txtItems.getText().trim(); // Reads items
+
             if (!itemsStr.isEmpty())
-                s.loadPackages(itemsStr.split(","));   // ← ellipsis in action
+                s.loadPackages(itemsStr.split(","));   // Splits items using comma (ellipsis method)
 
-            mgr.addShipment(s);
-            listener.refreshAll();
+            mgr.addShipment(s);     // Adds shipment to manager
+            listener.refreshAll();  // Refreshes UI
 
-            txtPkgId.setText(""); txtDest.setText("");
-            txtWeight.setText(""); txtItems.setText("");
-            listener.showInfo("Shipment " + id + " added successfully!");
+            txtPkgId.setText("");   // Clears package field
+            txtDest.setText("");    // Clears destination field
+            txtWeight.setText("");  // Clears weight field
+            txtItems.setText("");   // Clears items field
+
+            listener.showInfo("Shipment " + id + " added successfully!"); // Success message
 
         } catch (IllegalArgumentException ex) {
-            listener.showError("Input Error: " + ex.getMessage());
+            listener.showError("Input Error: " + ex.getMessage()); // Input error popup
         } catch (AssertionError ae) {
-            listener.showError("Assertion failed: " + ae.getMessage());
+            listener.showError("Assertion failed: " + ae.getMessage()); // Assertion error popup
         }
     }
 
     private void onDelete() {
-        int row = table.getSelectedRow();
-        if (row < 0) { listener.showWarn("Select a shipment to delete."); return; }
-        String id = (String) tableModel.getValueAt(row, 0);
+        int row = table.getSelectedRow(); // Selected table row
+
+        if (row < 0) {
+            listener.showWarn("Select a shipment to delete."); // No selection warning
+            return;
+        }
+
+        String id = (String) tableModel.getValueAt(row, 0); // Selected package ID
+
         int ok = JOptionPane.showConfirmDialog(this,
-            "Delete shipment " + id + "?", "Confirm", JOptionPane.YES_NO_OPTION);
-        if (ok == JOptionPane.YES_OPTION) { mgr.removeShipment(id); listener.refreshAll(); }
+            "Delete shipment " + id + "?", "Confirm", JOptionPane.YES_NO_OPTION); // Confirmation dialog
+
+        if (ok == JOptionPane.YES_OPTION) {
+            mgr.removeShipment(id); // Deletes shipment
+            listener.refreshAll();  // Refreshes UI
+        }
     }
 
     private void onMarkDelivered() {
-        int row = table.getSelectedRow();
-        if (row < 0) { listener.showWarn("Select a shipment to mark delivered."); return; }
-        String id = (String) tableModel.getValueAt(row, 0);
+        int row = table.getSelectedRow(); // Selected row
+
+        if (row < 0) {
+            listener.showWarn("Select a shipment to mark delivered."); // No selection warning
+            return;
+        }
+
+        String id = (String) tableModel.getValueAt(row, 0); // Selected package ID
+
         mgr.getAllShipments().stream()
-           .filter(s -> s.getPackageId().equals(id)).findFirst()
-           .ifPresent(s -> { s.setStatus("Delivered"); mgr.log("Marked delivered: " + id); });
-        listener.refreshAll();
+           .filter(s -> s.getPackageId().equals(id)) // Finds matching shipment
+           .findFirst()
+           .ifPresent(s -> {
+               s.setStatus("Delivered");             // Updates status
+               mgr.log("Marked delivered: " + id);   // Logs action
+           });
+
+        listener.refreshAll(); // Refreshes UI
     }
 
     public void refresh() {
-        tableModel.setRowCount(0);
-        for (Shipment s : mgr.getAllShipments()) {
+        tableModel.setRowCount(0); // Clears table
+
+        for (Shipment s : mgr.getAllShipments()) { // Iterates all shipments
             tableModel.addRow(new Object[]{
-                s.getPackageId(), s.getDestination(),
-                s.getWeightKg() + " kg", s.getPriority(),
-                s.getCarrierType(), s.getStatus(),
-                s.getItems().isEmpty() ? "—" : String.join(", ", s.getItems())
+                s.getPackageId(),                          // Package ID
+                s.getDestination(),                        // Destination
+                s.getWeightKg() + " kg",                  // Weight
+                s.getPriority(),                           // Priority
+                s.getCarrierType(),                        // Carrier type
+                s.getStatus(),                             // Status
+                s.getItems().isEmpty() ? "—" : String.join(", ", s.getItems()) // Items list
             });
         }
     }
