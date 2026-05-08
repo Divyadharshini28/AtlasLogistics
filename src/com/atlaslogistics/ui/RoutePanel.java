@@ -1,106 +1,116 @@
 package com.atlaslogistics.ui;
 
-import com.atlaslogistics.core.LogisticsManager;
-import com.atlaslogistics.core.RouteOptimizer;
+import com.atlaslogistics.core.LogisticsManager;   // Logistics manager singleton
+import com.atlaslogistics.core.RouteOptimizer;     // Route optimizer result model
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.*;                              // Swing components
+import java.awt.*;                                 // Layouts, colors, dimensions
 
-import static com.atlaslogistics.constants.ShippingConstants.*;
-import static com.atlaslogistics.ui.UIFactory.*;
+import static com.atlaslogistics.constants.ShippingConstants.*; // Shipping constants
+import static com.atlaslogistics.ui.UIFactory.*;                // Reusable UI utilities
 
 public class RoutePanel extends JPanel {
 
-    private final LogisticsManager mgr;
-    private final AppListener      listener;
+    private final LogisticsManager mgr;   // Central manager
+    private final AppListener listener;   // Listener for app communication
 
-    private JTextField        txtFrom, txtTo;
-    private JComboBox<String> cboCarrier;
-    private JTextArea         routeLog;
+    private JTextField txtFrom, txtTo;    // Input fields for source and destination
+    private JComboBox<String> cboCarrier; // Carrier selector
+    private JTextArea routeLog;           // Output log area
 
     public RoutePanel(AppListener listener) {
-        this.mgr      = LogisticsManager.getInstance();
-        this.listener = listener;
-        setBackground(C_BG);
-        setLayout(new BorderLayout(0, 12));
-        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        build();
+        this.mgr = LogisticsManager.getInstance(); // Gets singleton manager
+        this.listener = listener;                  // Stores listener
+        setBackground(C_BG);                       // Background color
+        setLayout(new BorderLayout(0, 12));        // Main layout
+        setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16)); // Padding
+        build();                                   // Builds UI
     }
 
     private void build() {
-        JPanel form = whiteCard();
+        JPanel form = whiteCard(); // Main form panel
         form.setBorder(BorderFactory.createCompoundBorder(
-            titledBorder("Native Route Optimizer  —  C++ Engine (JNI Stub)"),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)));
-        form.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 6));
+            titledBorder("Native Route Optimizer  —  C++ Engine (JNI Stub)"), // Form title
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)));                // Inner padding
+        form.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 6)); // Left-aligned layout
 
-        txtFrom    = styledField("From city");
-        txtFrom.setPreferredSize(new Dimension(150, 28));
-        txtTo      = styledField("To city");
-        txtTo.setPreferredSize(new Dimension(150, 28));
-        cboCarrier = styledCombo(new String[]{"Van", "Bike", "Plane"});
+        txtFrom = styledField("From city");       // Source city input
+        txtFrom.setPreferredSize(new Dimension(150, 28)); // Input size
 
-        JButton btnOptimize = accentButton("Optimize Route  (native)", C_ACCENT);
-        JButton btnClear    = accentButton("Clear", C_MUTED);
+        txtTo = styledField("To city");           // Destination city input
+        txtTo.setPreferredSize(new Dimension(150, 28)); // Input size
 
-        form.add(new JLabel("From:")); form.add(txtFrom);
-        form.add(new JLabel("To:"));   form.add(txtTo);
-        form.add(new JLabel("Carrier:")); form.add(cboCarrier);
-        form.add(btnOptimize); form.add(btnClear);
+        cboCarrier = styledCombo(new String[]{"Van", "Bike", "Plane"}); // Carrier dropdown
+
+        JButton btnOptimize = accentButton("Optimize Route  (native)", C_ACCENT); // Optimize button
+        JButton btnClear = accentButton("Clear", C_MUTED);                        // Clear button
+
+        form.add(new JLabel("From:"));       // Source label
+        form.add(txtFrom);                   // Source input
+        form.add(new JLabel("To:"));         // Destination label
+        form.add(txtTo);                     // Destination input
+        form.add(new JLabel("Carrier:"));    // Carrier label
+        form.add(cboCarrier);                // Carrier dropdown
+        form.add(btnOptimize);               // Optimize button
+        form.add(btnClear);                  // Clear button
 
         JLabel info = new JLabel(
             "<html><i style='color:gray'>" +
             "native keyword: method declared in Java, body in C++ via JNI. " +
             "In production: System.loadLibrary(\"atlasrouter\") loads atlasrouter.so / .dll. " +
             "Here, a Java stub simulates the native call." +
-            "</i></html>");
-        info.setFont(F_SMALL);
-        info.setBorder(BorderFactory.createEmptyBorder(6, 4, 0, 0));
+            "</i></html>"); // Informational note about JNI
 
-        routeLog = new JTextArea(14, 0);
-        routeLog.setFont(F_MONO);
-        routeLog.setEditable(false);
-        routeLog.setBackground(new Color(20, 22, 30));
-        routeLog.setForeground(new Color(100, 210, 255));
-        routeLog.setLineWrap(true);
-        JScrollPane logScroll = scrollPane(routeLog);
-        logScroll.setBorder(titledBorder("Optimizer Output"));
+        info.setFont(F_SMALL); // Small font
+        info.setBorder(BorderFactory.createEmptyBorder(6, 4, 0, 0)); // Top padding
 
-        btnOptimize.addActionListener(e -> onOptimize());
-        btnClear.addActionListener(e    -> routeLog.setText(""));
+        routeLog = new JTextArea(14, 0);         // Route log output area
+        routeLog.setFont(F_MONO);                // Monospaced font
+        routeLog.setEditable(false);             // Read-only
+        routeLog.setBackground(new Color(20, 22, 30)); // Dark background
+        routeLog.setForeground(new Color(100, 210, 255)); // Light blue text
+        routeLog.setLineWrap(true);              // Line wrap enabled
 
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-        top.add(form, BorderLayout.CENTER);
-        top.add(info, BorderLayout.SOUTH);
+        JScrollPane logScroll = scrollPane(routeLog); // Scroll pane for output
+        logScroll.setBorder(titledBorder("Optimizer Output")); // Output title
 
-        add(top,       BorderLayout.NORTH);
-        add(logScroll, BorderLayout.CENTER);
+        btnOptimize.addActionListener(e -> onOptimize()); // Optimize action
+        btnClear.addActionListener(e -> routeLog.setText("")); // Clear action
+
+        JPanel top = new JPanel(new BorderLayout()); // Top section
+        top.setOpaque(false);                        // Transparent
+        top.add(form, BorderLayout.CENTER);          // Form in center
+        top.add(info, BorderLayout.SOUTH);           // Info below form
+
+        add(top, BorderLayout.NORTH);        // Adds top section
+        add(logScroll, BorderLayout.CENTER); // Adds output log
     }
 
     private void onOptimize() {
-        String from    = txtFrom.getText().trim();
-        String to      = txtTo.getText().trim();
-        String carrier = (String) cboCarrier.getSelectedItem();
+        String from = txtFrom.getText().trim();       // Reads source city
+        String to = txtTo.getText().trim();           // Reads destination city
+        String carrier = (String) cboCarrier.getSelectedItem(); // Reads selected carrier
 
-        if (from.isEmpty() || to.isEmpty()) {
-            listener.showWarn("Enter both origin and destination."); return;
+        if (from.isEmpty() || to.isEmpty()) {         // Validates inputs
+            listener.showWarn("Enter both origin and destination.");
+            return;
         }
 
-        routeLog.append("─────────────────────────────────────────\n");
-        routeLog.append("[JAVA] Invoking native method...\n");
-        routeLog.append("[JAVA] public native double[] calculateFastestRoute(String, String, int)\n");
-        routeLog.append("[JNI ] Simulating C++ library: atlasrouter.so\n\n");
+        routeLog.append("─────────────────────────────────────────\n"); // Separator
+        routeLog.append("[JAVA] Invoking native method...\n");           // Java step
+        routeLog.append("[JAVA] public native double[] calculateFastestRoute(String, String, int)\n"); // Native declaration
+        routeLog.append("[JNI ] Simulating C++ library: atlasrouter.so\n\n"); // JNI simulation note
 
-        RouteOptimizer.RouteResult r = mgr.optimizeRoute(from, to, carrier);
-        routeLog.append(r.summary() + "\n\n");
+        RouteOptimizer.RouteResult r = mgr.optimizeRoute(from, to, carrier); // Optimizes route
+        routeLog.append(r.summary() + "\n\n"); // Appends optimization summary
 
         double charge = BASE_RATE_PER_KM * r.distanceKm *
-            ("Plane".equals(carrier) ? 100 * 3.5 : "Van".equals(carrier) ? 50 : 5);
-        routeLog.append(String.format("[CALC] Estimated charge : ₹%.2f%n", charge));
-        routeLog.append("─────────────────────────────────────────\n");
-        routeLog.setCaretPosition(routeLog.getDocument().getLength());
+            ("Plane".equals(carrier) ? 100 * 3.5 : "Van".equals(carrier) ? 50 : 5); // Charge calculation
 
-        listener.log("Route optimized: " + from + " → " + to);
+        routeLog.append(String.format("[CALC] Estimated charge : ₹%.2f%n", charge)); // Displays charge
+        routeLog.append("─────────────────────────────────────────\n"); // Separator
+        routeLog.setCaretPosition(routeLog.getDocument().getLength()); // Scrolls to latest line
+
+        listener.log("Route optimized: " + from + " → " + to); // Logs optimization action
     }
 }
