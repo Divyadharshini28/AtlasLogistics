@@ -1,6 +1,7 @@
 package com.atlaslogistics.constants;
 
-
+//this class contains constants that are used throughout the package
+//imported to every class present in the package
 public class ShippingConstants {
     public static final double BIKE_MAX_KG       = 5.0;
     public static final double VAN_MAX_KG        = 500.0;
